@@ -36,6 +36,22 @@ A package manager for SysML v2 and KerML, similar to pip, npm, or maven.
 - **Features**: Package management, project initialization, dependency resolution, KPAR building/publishing, Python/Java APIs
 - **Usage**: Manage SysML project dependencies, publish/share models, CI/CD pipelines
 
+### windseeker
+
+A CLI tool for SysML v2 dependency analysis, notebook generation, and view extraction.
+
+- **Source**: [Westfall-io/windseeker](https://github.com/Westfall-io/windseeker)
+- **Features**: Dependency graph analysis, Jupyter notebook generation, Mermaid diagram export
+- **Usage**: Analyze SysML projects, generate visualizations, build dependency-aware notebooks
+
+### windtrader
+
+A Python wrapper around the official Java SysML v2 validator.
+
+- **Source**: [Westfall-io/windtrader](https://github.com/Westfall-io/windtrader)
+- **Features**: CLI validation, scriptable interface, stable exit codes for CI
+- **Usage**: Validate SysML syntax from Python or CI pipelines
+
 ## Use Cases
 
 | Task | Recommended Tool |
@@ -43,12 +59,13 @@ A package manager for SysML v2 and KerML, similar to pip, npm, or maven.
 | Fast CLI parsing and validation | `sysml2` |
 | Editor integration with IDE features | `spec42` or `sysml-v2-lsp` |
 | JSON output for downstream processing | `sysml2` |
-| Automated validation in CI/CD | `spec42` |
+| Automated validation in CI/CD | `spec42` or `windtrader` |
 | Query and modify existing models | `sysml2` |
 | Language server for VS Code | `spec42` |
 | MCP server for AI agents | `sysml-v2-lsp` |
 | Complexity analysis and diagrams | `sysml-v2-lsp` |
 | Package management for SysML projects | `sysand` |
+| Dependency analysis and notebooks | `windseeker` |
 
 ## Quick Start
 
@@ -66,6 +83,12 @@ podman build -t sysml-v2-lsp -f sysml-v2-lsp/Containerfile .
 
 # Build sysand container
 podman build -t sysand -f sysand/Containerfile .
+
+# Build windseeker container
+podman build -t windseeker -f windseeker/Containerfile .
+
+# Build windtrader container
+podman build -t windtrader -f windtrader/Containerfile .
 ```
 
 ### Running Against SysML Files
@@ -153,6 +176,29 @@ podman run -v "$(pwd):/workspace" --rm sysand publish
 podman run --rm sysand --version
 ```
 
+**Using windseeker:**
+
+```bash
+# Run dependency analysis on a folder
+podman run -v "$(pwd):/workspace" --rm windseeker run --folder /workspace
+
+# Generate dependency graph
+podman run -v "$(pwd):/workspace" --rm windseeker run --folder /workspace --graph
+
+# Execute generated notebook
+podman run -v "$(pwd):/workspace" --rm windseeker run --folder /workspace --execute
+```
+
+**Using windtrader:**
+
+```bash
+# Validate a SysML file
+echo "part { attribute mass; }" | podman run -i --rm windtrader
+
+# Validate with custom timeout
+podman run -v "$(pwd):/workspace" --rm windtrader --timeout 30
+```
+
 ## Directory Structure
 
 ```
@@ -165,7 +211,11 @@ podman run --rm sysand --version
 │   └── Containerfile
 ├── sysml-v2-lsp/    # sysml-v2-lsp container
 │   └── Containerfile
-└── sysand/          # sysand container
+├── sysand/          # sysand container
+│   └── Containerfile
+├── windseeker/      # windseeker container
+│   └── Containerfile
+└── windtrader/      # windtrader container
     └── Containerfile
 ```
 
@@ -178,6 +228,8 @@ The individual tools have their own licenses:
 - spec42: MIT License
 - sysml-v2-lsp: MIT License
 - sysand: MIT or Apache-2.0 License
+- windseeker: MIT License
+- windtrader: MIT License
 - PackCC: MIT License (included in sysml2 build)
 
 The SysML v2 standard library embedded in spec42 has separate licensing; see [spec42's Third Party Notices](https://github.com/elan8/spec42/blob/main/THIRD_PARTY_NOTICES.md).
