@@ -1,0 +1,49 @@
+FROM node:22-bookworm
+
+LABEL maintainer="sysml2-tools"
+LABEL description="Build environment for sysml-v2-lsp (SysML v2 Language Server)"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth 1 https://github.com/daltskin/sysml-v2-lsp.git /workspace
+
+WORKDIR /workspace
+
+RUN npm install
+
+RUN npm run build
+
+FROM node:22-bookworm-slim
+
+LABEL maintainer="sysml2-tools"
+LABEL description="Runtime image for sysml-v2-lsp (SysML v2 Language Server)"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=0 /workspace/dist /workspace/dist
+COPY --from=0 /workspace/node_modules /workspace/node_modules
+COPY --from=0 /workspace/package.json /workspace/package.json
+COPY --from=0 /workspace/sysml.library /workspace/sysml.library
+COPY --from=0 /workspace/language-configuration.json /workspace/language-configuration.json
+COPY --from=0 /workspace/index.cjs /workspace/index.cjs
+COPY --from=0 /workspace/esbuild.mjs /workspace/esbuild.mjs
+COPY --from=0 /workspace/server/node_modules /workspace/server/node_modules
+
+COPY --from=0 /workspace/clients/vscode/node_modules /workspace/clients/vscode/node_modules
+
+WORKDIR /workspace
+
+ENV NODE_ENV=production
+
+RUN echo '#!/bin/sh' > /usr/local/bin/sysml-lsp && \
+    echo 'exec node /workspace/dist/server/server.js "$@"' >> /usr/local/bin/sysml-lsp && \
+    echo '#!/bin/sh' > /usr/local/bin/sysml-mcp && \
+    echo 'exec node /workspace/dist/server/mcpServer.js "$@"' >> /usr/local/bin/sysml-mcp && \
+    chmod +x /usr/local/bin/sysml-lsp /usr/local/bin/sysml-mcp
+
+ENTRYPOINT ["/usr/local/bin/sysml-mcp"]

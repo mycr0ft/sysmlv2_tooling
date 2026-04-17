@@ -20,16 +20,26 @@ A Rust-based SysML v2 language server and CLI with full LSP support.
 - **Features**: LSP server (diagnostics, hover, completion, go to definition, find references, rename, etc.), CLI validation, bundled standard library
 - **Usage**: Editor integration (VS Code), CLI validation, CI/CD pipelines
 
+### sysml-v2-lsp
+
+A TypeScript-based SysML v2 language server powered by ANTLR4 with MCP server support.
+
+- **Source**: [daltskin/sysml-v2-lsp](https://github.com/daltskin/sysml-v2-lsp)
+- **Features**: LSP server (diagnostics, hover, completion, go to definition, find references, rename, semantic tokens), MCP server for AI integration, complexity analysis, Mermaid diagram generation
+- **Usage**: Editor integration, AI-assisted modeling, CLI tooling
+
 ## Use Cases
 
 | Task | Recommended Tool |
 |------|------------------|
 | Fast CLI parsing and validation | `sysml2` |
-| Editor integration with IDE features | `spec42` |
+| Editor integration with IDE features | `spec42` or `sysml-v2-lsp` |
 | JSON output for downstream processing | `sysml2` |
 | Automated validation in CI/CD | `spec42` |
 | Query and modify existing models | `sysml2` |
 | Language server for VS Code | `spec42` |
+| MCP server for AI agents | `sysml-v2-lsp` |
+| Complexity analysis and diagrams | `sysml-v2-lsp` |
 
 ## Quick Start
 
@@ -41,6 +51,9 @@ podman build -t sysml2 -f sysml2/Containerfile .
 
 # Build spec42 container
 podman build -t spec42 -f spec42/Containerfile .
+
+# Build sysml-v2-lsp container
+podman build -t sysml-v2-lsp -f sysml-v2-lsp/Containerfile .
 ```
 
 ### Running Against SysML Files
@@ -96,6 +109,16 @@ chmod +x /usr/local/bin/spec42
 # Set "spec42.serverPath" to point to the container or copy
 ```
 
+**Using sysml-v2-lsp:**
+
+```bash
+# Start LSP server (for editor integration)
+podman run -v "$(pwd):/workspace" --rm -i sysml-v2-lsp sysml-lsp
+
+# Start MCP server (for AI agent integration)
+podman run -v "$(pwd):/workspace" --rm -i sysml-v2-lsp sysml-mcp
+```
+
 ## Directory Structure
 
 ```
@@ -104,7 +127,9 @@ chmod +x /usr/local/bin/spec42
 ├── README.md        # This file
 ├── sysml2/          # sysml2 container
 │   └── Containerfile
-└── spec42/          # spec42 container
+├── spec42/          # spec42 container
+│   └── Containerfile
+└── sysml-v2-lsp/    # sysml-v2-lsp container
     └── Containerfile
 ```
 
@@ -115,6 +140,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 The individual tools have their own licenses:
 - sysml2: MIT License
 - spec42: MIT License
+- sysml-v2-lsp: MIT License
 - PackCC: MIT License (included in sysml2 build)
 
 The SysML v2 standard library embedded in spec42 has separate licensing; see [spec42's Third Party Notices](https://github.com/elan8/spec42/blob/main/THIRD_PARTY_NOTICES.md).
