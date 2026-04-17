@@ -28,6 +28,14 @@ A TypeScript-based SysML v2 language server powered by ANTLR4 with MCP server su
 - **Features**: LSP server (diagnostics, hover, completion, go to definition, find references, rename, semantic tokens), MCP server for AI integration, complexity analysis, Mermaid diagram generation
 - **Usage**: Editor integration, AI-assisted modeling, CLI tooling
 
+### sysand
+
+A package manager for SysML v2 and KerML, similar to pip, npm, or maven.
+
+- **Source**: [sensmetry/sysand](https://github.com/sensmetry/sysand)
+- **Features**: Package management, project initialization, dependency resolution, KPAR building/publishing, Python/Java APIs
+- **Usage**: Manage SysML project dependencies, publish/share models, CI/CD pipelines
+
 ## Use Cases
 
 | Task | Recommended Tool |
@@ -40,6 +48,7 @@ A TypeScript-based SysML v2 language server powered by ANTLR4 with MCP server su
 | Language server for VS Code | `spec42` |
 | MCP server for AI agents | `sysml-v2-lsp` |
 | Complexity analysis and diagrams | `sysml-v2-lsp` |
+| Package management for SysML projects | `sysand` |
 
 ## Quick Start
 
@@ -54,6 +63,9 @@ podman build -t spec42 -f spec42/Containerfile .
 
 # Build sysml-v2-lsp container
 podman build -t sysml-v2-lsp -f sysml-v2-lsp/Containerfile .
+
+# Build sysand container
+podman build -t sysand -f sysand/Containerfile .
 ```
 
 ### Running Against SysML Files
@@ -119,6 +131,28 @@ podman run -v "$(pwd):/workspace" --rm -i sysml-v2-lsp sysml-lsp
 podman run -v "$(pwd):/workspace" --rm -i sysml-v2-lsp sysml-mcp
 ```
 
+**Using sysand:**
+
+```bash
+# Initialize a new project
+podman run -v "$(pwd):/workspace" --rm sysand init
+
+# Add a package dependency
+podman run -v "$(pwd):/workspace" --rm sysand add <package>
+
+# Sync dependencies
+podman run -v "$(pwd):/workspace" --rm sysand sync
+
+# Build a KPAR archive
+podman run -v "$(pwd):/workspace" --rm sysand build
+
+# Publish to package index
+podman run -v "$(pwd):/workspace" --rm sysand publish
+
+# Get version
+podman run --rm sysand --version
+```
+
 ## Directory Structure
 
 ```
@@ -129,7 +163,9 @@ podman run -v "$(pwd):/workspace" --rm -i sysml-v2-lsp sysml-mcp
 │   └── Containerfile
 ├── spec42/          # spec42 container
 │   └── Containerfile
-└── sysml-v2-lsp/    # sysml-v2-lsp container
+├── sysml-v2-lsp/    # sysml-v2-lsp container
+│   └── Containerfile
+└── sysand/          # sysand container
     └── Containerfile
 ```
 
@@ -141,6 +177,7 @@ The individual tools have their own licenses:
 - sysml2: MIT License
 - spec42: MIT License
 - sysml-v2-lsp: MIT License
+- sysand: MIT or Apache-2.0 License
 - PackCC: MIT License (included in sysml2 build)
 
 The SysML v2 standard library embedded in spec42 has separate licensing; see [spec42's Third Party Notices](https://github.com/elan8/spec42/blob/main/THIRD_PARTY_NOTICES.md).

@@ -1,0 +1,40 @@
+FROM ubuntu:24.04
+
+LABEL maintainer="sysml2-tools"
+LABEL description="Build environment for sysand (SysML v2 package manager)"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    ca-certificates \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN git clone --depth 1 https://github.com/sensmetry/sysand.git /workspace
+
+WORKDIR /workspace
+
+RUN cargo build --release -p sysand
+
+FROM ubuntu:24.04
+
+LABEL maintainer="sysml2-tools"
+LABEL description="Runtime image for sysand (SysML v2 package manager)"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=0 /workspace/target/release/sysand /usr/local/bin/sysand
+
+ENTRYPOINT ["sysand"]
+CMD ["--help"]
