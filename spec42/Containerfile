@@ -1,0 +1,36 @@
+FROM ubuntu:24.04
+
+LABEL maintainer="sysml2-tools"
+LABEL description="Build environment for spec42 (SysML v2 tooling)"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN git clone --depth 1 https://github.com/elan8/spec42.git /workspace
+
+WORKDIR /workspace
+
+RUN cargo build --release
+
+FROM ubuntu:24.04
+
+LABEL maintainer="sysml2-tools"
+LABEL description="Runtime image for spec42 (SysML v2 tooling)"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=0 /workspace/target/release/spec42 /usr/local/bin/spec42
+
+ENTRYPOINT ["spec42"]

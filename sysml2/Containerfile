@@ -1,0 +1,37 @@
+FROM ubuntu:24.04
+
+LABEL maintainer="sysml2-tools"
+LABEL description="Build environment for SysML v2 CLI parser"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && git config --global http.sslVerify true
+
+RUN git clone --depth 1 https://github.com/arithy/packcc.git /tmp/packcc && \
+    cc -O2 -o /tmp/packcc/packcc /tmp/packcc/src/packcc.c && \
+    install -D -m 755 /tmp/packcc/packcc /usr/local/bin/packcc && \
+    rm -rf /tmp/packcc
+
+RUN git clone --depth 1 https://github.com/zbigniewsobiecki/sysml2.git /workspace
+
+WORKDIR /workspace
+
+RUN mkdir -p build && cd build && \
+    cmake -DCMAKE_C_FLAGS="-D_DEFAULT_SOURCE" .. && \
+    make -j$(nproc)
+
+FROM ubuntu:24.04
+
+LABEL maintainer="sysml2-tools"
+LABEL description="Runtime image for SysML v2 CLI"
+
+COPY --from=0 /workspace/build/sysml2 /usr/local/bin/sysml2
+COPY --from=0 /usr/local/bin/packcc /usr/local/bin/packcc
+
+ENTRYPOINT ["sysml2"]
